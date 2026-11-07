@@ -10,9 +10,9 @@ import sys
 from lunar_python import Solar
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CALS = [  # file, uid tag, calendar name, which list
-    ('almanac-yi.ics', 'yi', '黄历·宜', 'yi'),
-    ('almanac-ji.ics', 'ji', '黄历·忌', 'ji'),
+CALS = [  # file, uid tag, calendar name, which list, suggested default color (Apple hex, RFC 7986 CSS name)
+    ('almanac-yi.ics', 'yi', '黄历·宜', 'yi', '#FFCC00', 'gold'),
+    ('almanac-ji.ics', 'ji', '黄历·忌', 'ji', '#8E8E93', 'gray'),
 ]
 
 
@@ -64,9 +64,10 @@ if __name__ == '__main__':
     while d <= end:
         days.append((d,) + day_info(d))
         d += dt.timedelta(days=1)
-    for fname, tag, name, key in CALS:
+    for fname, tag, name, key, apple_color, css_color in CALS:
         L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//arlo555777-coder//almanac-%s//CN' % tag, 'CALSCALE:GREGORIAN',
              'METHOD:PUBLISH', 'X-WR-CALNAME:' + name, 'X-WR-TIMEZONE:Asia/Shanghai',
+             'X-APPLE-CALENDAR-COLOR:' + apple_color, 'COLOR:' + css_color,
              'X-WR-CALDESC:每日%s；按传统通书算法（lunar-python）计算，不同黄历版本可能略有出入' % name[-1],
              'REFRESH-INTERVAL;VALUE=DURATION:P1D', 'X-PUBLISHED-TTL:P1D']
         for day, lists, desc in days:
