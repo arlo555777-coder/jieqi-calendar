@@ -6,6 +6,7 @@ import os
 import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+STAMP = dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
 SOURCES = ['https://raw.githubusercontent.com/NateScarlet/holiday-cn/master/{}.json',
            'https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/{}.json']
 
@@ -52,8 +53,10 @@ def build(years):
         for d in days:
             same = groups[(d['name'], d['isOffDay'])]
             kind = '假期' if d['isOffDay'] else '补班'
-            summary = '%s %s 第%d天/共%d天' % (d['name'], kind, same.index(d['date']) + 1, len(same))
-            events.append((d['date'], summary, paper, d['isOffDay']))
+            # iPhone month view shows ~3 characters, so the title leads with 休 / 班; the day count goes to the notes
+            summary = '%s %s' % ('休' if d['isOffDay'] else '班', d['name'])
+            note = '%s %s 第%d天/共%d天' % (d['name'], kind, same.index(d['date']) + 1, len(same))
+            events.append((d['date'], summary, note, paper))
     return events
 
 
@@ -62,16 +65,15 @@ def write(events, path):
          'METHOD:PUBLISH', 'X-WR-CALNAME:中国节假日', 'X-WR-TIMEZONE:Asia/Shanghai',
          'X-WR-CALDESC:中国法定节假日放假和补班安排，每天自动同步国务院通知',
          'REFRESH-INTERVAL;VALUE=DURATION:P1D', 'X-PUBLISHED-TTL:P1D']
-    for date, summary, paper, off in events:
+    for date, summary, note, paper in events:
         d = dt.date.fromisoformat(date)
         ymd = d.strftime('%Y%m%d')
         L += ['BEGIN:VEVENT', 'UID:holiday-%s@arlo555777-coder' % ymd,
-              'DTSTAMP:%sT000000Z' % ymd,                      # fixed, so the file only changes when the data does
+              'DTSTAMP:' + STAMP,                              # build time, so phones pick up changed titles
               'DTSTART;VALUE=DATE:' + ymd,
               'DTEND;VALUE=DATE:' + (d + dt.timedelta(days=1)).strftime('%Y%m%d'),
-              'SUMMARY:' + ics_text(summary)]
-        if paper:
-            L.append('DESCRIPTION:' + ics_text('放假通知：' + paper))
+              'SUMMARY:' + ics_text(summary),
+              'DESCRIPTION:' + ics_text(note + ('\n放假通知：' + paper if paper else ''))]
         L += ['TRANSP:TRANSPARENT', 'END:VEVENT']          # never mark the day as busy
     L.append('END:VCALENDAR')
     with open(path, 'w', encoding='utf-8', newline='') as f:
