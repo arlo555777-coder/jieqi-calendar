@@ -1,7 +1,8 @@
-# Build almanac.ics (黄历: 宜 / 忌 for every day) for this year and next year with lunar_python.
-# Runs in GitHub Actions every day, so the window keeps rolling forward.
+# Build almanac.ics (黄历: 宜 / 忌 for every day) with lunar_python.
+# Updated by hand: `python make_almanac.py [first_year last_year]` (default: this year and next year).
 import datetime as dt
 import os
+import sys
 
 from lunar_python import Solar
 
@@ -49,7 +50,8 @@ def day_event(d):
 
 if __name__ == '__main__':
     year = dt.datetime.now(dt.timezone(dt.timedelta(hours=8))).year
-    start, end = dt.date(year, 1, 1), dt.date(year + 1, 12, 31)
+    y0, y1 = (int(sys.argv[1]), int(sys.argv[2])) if len(sys.argv) > 2 else (year, year + 1)
+    start, end = dt.date(y0, 1, 1), dt.date(y1, 12, 31)
     L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//arlo555777-coder//almanac//CN', 'CALSCALE:GREGORIAN',
          'METHOD:PUBLISH', 'X-WR-CALNAME:黄历', 'X-WR-TIMEZONE:Asia/Shanghai',
          'X-WR-CALDESC:每日宜忌、农历、干支、冲煞；按传统通书算法（lunar-python）计算，不同黄历版本可能略有出入',
