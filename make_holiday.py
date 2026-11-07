@@ -63,7 +63,8 @@ def build(years):
 def write(events, path):
     L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//arlo555777-coder//china-holiday//CN', 'CALSCALE:GREGORIAN',
          'METHOD:PUBLISH', 'X-WR-CALNAME:中国节假日', 'X-WR-TIMEZONE:Asia/Shanghai',
-         'X-WR-CALDESC:中国法定节假日放假和补班安排，每天自动同步国务院通知',
+         'X-WR-CALDESC:中国法定节假日放假和补班安排，按国务院通知每年手动更新',
+         'X-APPLE-CALENDAR-COLOR:#FF9500', 'COLOR:darkorange',   # suggested default color: orange
          'REFRESH-INTERVAL;VALUE=DURATION:P1D', 'X-PUBLISHED-TTL:P1D']
     for date, summary, note, paper in events:
         d = dt.date.fromisoformat(date)
